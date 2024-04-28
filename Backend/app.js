@@ -1,8 +1,10 @@
 const express = require("express");
 const userRouter = require("./routes/user");//.js
+require("./db/index");
 
 const app = express();
-app.use(userRouter);
+app.use(express.json());
+app.use('/api/user', userRouter);
 
 // MVC
 

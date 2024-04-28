@@ -1,8 +1,10 @@
 const express = require("express");
-const { createUser } = require("../controllers/user");
+
+const { create } = require("../controllers/user");
+const { validate, userValidator } = require("../middleware/validator");
 
 const router = express.Router();
 
-router.post("/user-create", createUser);
+router.post("/create", userValidator, validate, create);// check it's not empty, if is empty, send error message
 
 module.exports = router;
