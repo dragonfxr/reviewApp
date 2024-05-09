@@ -1,6 +1,6 @@
 const { check, validationResult } = require("express-validator");
 
-exports.userValidator = [
+exports.userValidator = [// no need to next(), because already handled the error.
     check('name').trim().not().isEmpty().withMessage('Name is missing.'),
     check('email').normalizeEmail().isEmail().withMessage('Email is invalid.'),
     check('password').trim().not().isEmpty().withMessage('Password is missing.').isLength({ min:6, max:20}).withMessage(
@@ -14,4 +14,4 @@ exports.validate = (req, res, next) => {
         return res.json({error: error[0].msg})
     }
     next();
-}
+};
