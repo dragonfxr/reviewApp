@@ -8,6 +8,9 @@ exports.userValidator = [// no need to next(), because already handled the error
     ),
 ];
 
+exports.validatePassword = [check('newPassword').trim().not().isEmpty().withMessage('Password is missing.').isLength({ min:6, max:20}).withMessage(
+    'Password must be 6-20 characters long.'),];
+
 exports.validate = (req, res, next) => {
     const error = validationResult(req).array();
     if (error.length) {

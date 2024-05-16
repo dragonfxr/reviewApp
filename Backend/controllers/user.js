@@ -29,7 +29,7 @@ exports.create = async (req, res) => {
     await newEmailVerificationToken.save();
     // send that otp to users
 
-    var transport = generateMailTransporter();
+    const transport = generateMailTransporter();
 
     transport.sendMail({
       from: 'verification@reviewapp.com',
@@ -77,7 +77,7 @@ exports.verifyEmail = async (req, res) => {
 
   await EmailVerificationToken.findByIdAndDelete(token._id);
 
-  var transport = generateMailTransporter();
+  const transport = generateMailTransporter();
 
   transport.sendMail({
     from: 'verification@reviewapp.com',
@@ -111,7 +111,7 @@ exports.resendEmailVerificationToken = async (req, res) => {
 
   await newEmailVerificationToken.save();
   // send that otp to users
-  var transport = generateMailTransporter();
+  const transport = generateMailTransporter();
 
   transport.sendMail({
     from: 'verification@reviewapp.com',
@@ -143,7 +143,7 @@ exports.forgetPassword = async(req, res) => {
 
   const resetPasswordUrl = `http://localhost:3000/reset-password?token=${token}&id=${user._id}`;
 
-  var transport = generateMailTransporter();
+  const transport = generateMailTransporter();
 
   transport.sendMail({
     from: 'security@reviewapp.com',
@@ -156,4 +156,38 @@ exports.forgetPassword = async(req, res) => {
   });
   
   res.json({message: 'Links sent to your email!'});
+};
+
+exports.sendResetPasswordTokenStatus = (req, res) => {
+  res.json({valid: true});
+};
+
+exports.resetPassword = async (req, res) => {
+  const {newPassword, userId} = req.body;
+
+  const user = await User.findById(userId);
+
+  //check if its equal to the old password:
+  const matched = await user.comparePassword(newPassword);
+  if (matched) return sendError(res, 'The new password must be different from the old one!');
+
+  user.password = newPassword;//model 里有一个hashing的方法是只要有变化就hashing 再save。所以这里暂不用save
+  await user.save();
+
+  //delete token 
+  await PasswordResetToken.findByIdAndDelete(req.resetToken._id);// this req comes from the middleware function 'isValidPassResetToken'
+
+  const transport = generateMailTransporter();
+
+  transport.sendMail({
+    from: 'security@reviewapp.com',
+    to: user.email,
+    subject: 'Password Reset Successfully',
+    html: `
+      <h1>Password reset successfully!</h1>
+      <p>Try to login using the new password</p>
+    `
+  });
+
+  res.json({message: 'Password reset successfully!'});
 };

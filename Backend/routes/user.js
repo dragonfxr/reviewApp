@@ -1,7 +1,7 @@
 const express = require("express");
 
-const { create, verifyEmail, resendEmailVerificationToken, forgetPassword } = require("../controllers/user");
-const { validate, userValidator } = require("../middleware/validator");
+const { create, verifyEmail, resendEmailVerificationToken, forgetPassword, sendResetPasswordTokenStatus, resetPassword } = require("../controllers/user");
+const { validate, userValidator, validatePassword } = require("../middleware/validator");
 const { isValidPassResetToken } = require("../middleware/user");
 
 const router = express.Router();
@@ -10,8 +10,7 @@ router.post("/create", userValidator, validate, create);// check it's not empty,
 router.post("/verify-email", verifyEmail);
 router.post("/resend-email-verification", resendEmailVerificationToken);
 router.post("/forget-password", forgetPassword);
-router.post("/verify-pass-reset-token", isValidPassResetToken, (req, res) => {
-    res.json({valid: true});
-});
+router.post("/verify-pass-reset-token", isValidPassResetToken, sendResetPasswordTokenStatus);
+router.post("/reset-password", validatePassword, validate, isValidPassResetToken, resetPassword);
 
 module.exports = router;

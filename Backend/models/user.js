@@ -30,6 +30,11 @@ userSchema.pre('save', async function(next){ // before saving to the database, t
         this.password = hash
     }
     next();
-})
+});
+
+userSchema.methods.comparePassword = async function(password) {
+    const result = await bcrypt.compare(password, this.password);//this.token 这个schema的里的一个属性token
+    return result;
+  };
 
 module.exports = mongoose.model("User", userSchema);
