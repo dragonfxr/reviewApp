@@ -8,6 +8,11 @@ exports.userValidator = [// no need to next(), because already handled the error
     ),
 ];
 
+exports.signInValidator = [// no need to next(), because already handled the error.
+    check('email').normalizeEmail().isEmail().withMessage('Email is invalid.'),
+    check('password').trim().not().isEmpty().withMessage('Password is missing.'),
+];
+
 exports.validatePassword = [check('newPassword').trim().not().isEmpty().withMessage('Password is missing.').isLength({ min:6, max:20}).withMessage(
     'Password must be 6-20 characters long.'),];
 

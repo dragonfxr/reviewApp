@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+//mongoose会在保存的时候自动生成一个id属性：_id
 const userSchema = mongoose.Schema({
     name:{
         type: String,
