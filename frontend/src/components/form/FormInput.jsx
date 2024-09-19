@@ -12,7 +12,9 @@ export default function FormInput( {name,label, placeholder, ...rest} ) {
           {...rest}
         />
         <label className='font-semibold dark:text-dark-subtle dark:peer-focus:text-white transition
-        text-light-subtle peer-focus:text-primary self-start' htmlFor={name}>{label}</label>
+          text-light-subtle peer-focus:text-primary self-start' htmlFor={name}>
+          {label}
+        </label>
     </div>
   )
-}
+};
