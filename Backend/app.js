@@ -5,11 +5,16 @@ const { errorHandler } = require("./middleware/error");
 require('dotenv').config();
 require("./db/index");//mongoose uri
 const userRouter = require("./routes/user");//.js
+const cors = require('cors');
+const { handleNotFound } = require("./utils/helper");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 app.use('/api/user', userRouter);
+
+app.use('/*', handleNotFound);
 
 app.use(errorHandler);
 

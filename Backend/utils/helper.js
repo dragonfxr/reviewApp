@@ -14,4 +14,8 @@ exports.generateRandomBytes = () => {
             resolve(buffString);
         });
     });
-}
+};
+
+exports.handleNotFound = (req, res) => {
+    this.sendError(res, 'Not Found', 404);
+};

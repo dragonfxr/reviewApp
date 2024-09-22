@@ -7,6 +7,7 @@ import ForgetPassword from './components/auth/ForgetPassword';
 import ComfirmPassword from './components/auth/ComfirmPassword';
 import { Routes, Route } from 'react-router';
 import Home from './components/Home';
+import NotFound from './components/NotFound';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path='/auth/verification' element = {<EmailVerification />}/>
         <Route path='/auth/forget-password' element = {<ForgetPassword />}/>
         <Route path='/auth/confirm-password' element = {<ComfirmPassword />}/>
+        <Route path='*' element = {<NotFound/>}/> 
       </Routes>
     </>
   )
