@@ -5,15 +5,29 @@ import Submit from '../form/Submit';
 import Title from '../form/Title';
 import FormContainer from '../form/FormContainer';
 import { commonModalClasses } from '../../utils/theme';
+import { verifyUserEmail } from '../../api/auth';
+import { useNotification } from '../../hooks';
 
 const OTP_LENGTH = 6;
 let currentOTPIndex;
+
+const isValidOTP = (otp) => {
+  let valid = false;
+
+  for (let val of otp){
+    valid = !isNaN(parseInt(val));
+    if (!valid) break;
+  };
+
+  return valid;
+}
 
 export default function EmailVerification() {
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(''));
   const [activeOtpIndex, setActiveOtpIndex] = useState(0);
   
   const inputRef = useRef();
+  const {updateNotification} = useNotification();
 
   const { state } = useLocation();
   const user = state?.user;
@@ -51,8 +65,16 @@ export default function EmailVerification() {
      }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if(!isValidOTP(otp)){
+      return console.log('invalid OTP');
+    };
+    const {error, message} = await verifyUserEmail({OTP: otp.join(''), userId: user.id});
+    if (error) return updateNotification('error', error);
+
+    updateNotification('success', message);
   }
 
   useEffect(() => {
@@ -61,9 +83,9 @@ export default function EmailVerification() {
 
   useEffect(() => {
     if (!user) navigate('/not-found');
-  }, [user]);
+  }, [user, navigate]);
 
-  if (!user) return null;
+  // if (!user) return null;
 
   return (
     <FormContainer>
@@ -90,7 +112,7 @@ export default function EmailVerification() {
                 );
               })}
             </div>
-              <Submit value='Send Link'/>
+              <Submit value='Verify Account'/>
             </form>
         </Container>
     </FormContainer>

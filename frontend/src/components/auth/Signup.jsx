@@ -8,10 +8,13 @@ import CustomLink from '../CustomLink';
 import { commonModalClasses } from '../../utils/theme';
 import FormContainer from '../form/FormContainer';
 import { createUser } from '../../api/auth';
+import { useNotification } from '../../hooks';
 
 const validateUserInfo = ({name, email, password}) => {
 
+  // eslint-disable-next-line
   const isValidName = /^[a-z A-Z]+$/
+  // eslint-disable-next-line
   const isValidEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
   if (!name.trim()) return {ok:false, error:'Name is Missing!'};
@@ -37,6 +40,8 @@ export default function Signup() {
 
   const navigate = useNavigate();
 
+  const {updateNotification} = useNotification();
+
   const {name, email, password} = userInfo;
 
   const handleChange = ({target}) => {
@@ -46,34 +51,34 @@ export default function Signup() {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    const{ok, error} = validateUserInfo(userInfo);
+    const {ok, error} = validateUserInfo(userInfo);
 
-    if(!ok) return console.log(error);
+    if(!ok) return updateNotification('error', error);
 
     const response = await createUser(userInfo);
     if (response.error) return console.log(response.error);
 
     navigate('/auth/verification', {
-      state: { user: response.user }, 
-      replace: true ///replace****:does not store the history
+      state: { user: response.user }, //state 临时参数
+      replace: true ///replace****:does not store the history 用户点击浏览器“返回”按钮时不会返回到你导航之前的页面。
     });
   };
 
   return (
     <FormContainer>
-        <Container>
-            <form onSubmit={handleSubmit} className={commonModalClasses + ' w-72'}>
-                <Title>Sign up</Title>
-                <FormInput value={name} onChange={handleChange} label='Name' placeholder='Your Name' name='name'/>
-                <FormInput value={email} onChange={handleChange} label='Email' placeholder='yourEmail@email.com' name='email'/>
-                <FormInput value={password} onChange={handleChange} label='Password' placeholder='*********' name='password' type='password'/>
-                <Submit value='Sign up'/>
-                <div className="flex justify-between">
-                    <CustomLink to='/auth/forget-password'>Forget Password</CustomLink>
-                    <CustomLink to='/auth/signin'>Sign In</CustomLink>
-                </div>
-            </form>
-        </Container>
+      <Container>
+        <form onSubmit={handleSubmit} className={commonModalClasses + ' w-72'}>
+            <Title>Sign up</Title>
+            <FormInput value={name} onChange={handleChange} label='Name' placeholder='Your Name' name='name'/>
+            <FormInput value={email} onChange={handleChange} label='Email' placeholder='yourEmail@email.com' name='email'/>
+            <FormInput value={password} onChange={handleChange} label='Password' placeholder='*********' name='password' type='password'/>
+            <Submit value='Sign up'/>
+            <div className="flex justify-between">
+              <CustomLink to='/auth/forget-password'>Forget Password</CustomLink>
+              <CustomLink to='/auth/signin'>Sign In</CustomLink>
+            </div>
+        </form>
+      </Container>
     </FormContainer>
   )
 }

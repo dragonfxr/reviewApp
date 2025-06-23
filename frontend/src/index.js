@@ -4,15 +4,17 @@ import './index.css';
 
 import { BrowserRouter } from 'react-router-dom';
 import ThemeProvider from "./components/context/ThemeProvider";
+import NotificationProvider from "./components/context/NotificationProvider";
 
 const rootElement = document.getElementById('root');
 const root = ReactDom.createRoot(rootElement);
 
 root.render(
     <BrowserRouter>
-    <ThemeProvider>
-        <App />
-    </ThemeProvider>
-        
+        <NotificationProvider>
+            <ThemeProvider>
+                <App />
+            </ThemeProvider>
+        </NotificationProvider>
     </BrowserRouter>
 );
