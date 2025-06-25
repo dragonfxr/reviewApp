@@ -3,18 +3,16 @@ import App from "./App";
 import './index.css';
 
 import { BrowserRouter } from 'react-router-dom';
-import ThemeProvider from "./components/context/ThemeProvider";
-import NotificationProvider from "./components/context/NotificationProvider";
+
+import ContextProviders from "./components/context";
 
 const rootElement = document.getElementById('root');
 const root = ReactDom.createRoot(rootElement);
 
 root.render(
     <BrowserRouter>
-        <NotificationProvider>
-            <ThemeProvider>
-                <App />
-            </ThemeProvider>
-        </NotificationProvider>
+        <ContextProviders>
+            <App />
+        </ContextProviders>
     </BrowserRouter>
 );
