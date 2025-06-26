@@ -7,6 +7,8 @@ import CustomLink from '../CustomLink';
 import { commonModalClasses } from '../../utils/theme';
 import FormContainer from '../form/FormContainer';
 import { useAuth, useNotification } from '../../hooks';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 // import { ThemeContext } from '../context/ThemeProvider';
 // import { useTheme } from '../../hooks'
 
@@ -31,9 +33,10 @@ export default function Signin() {
     password: '',
   });
 
+  const navigate = useNavigate()
   const { updateNotification } = useNotification();
   const { handleLogin, authInfo } = useAuth();//handleLogin, authInfo 的顺序无所谓。“对象解构赋值”，它是按“属性名”匹配的，不看顺序。
-  const { isPending } = authInfo // 从authInfo解构出来isPending
+  const { isPending, isLoggedIn } = authInfo // 从authInfo解构出来isPending
 
   const handleChange = ({target}) => {
     const {value, name} = target;
@@ -47,6 +50,11 @@ export default function Signin() {
     if(!ok) return updateNotification('error', error);
     handleLogin(userInfo.email, userInfo.password);
   };
+
+  useEffect(() => {
+    // move the user to somewhere
+    if (isLoggedIn) navigate('/')
+   }, [isLoggedIn]);
 
   return (
     <FormContainer>

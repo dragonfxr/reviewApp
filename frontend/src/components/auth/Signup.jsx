@@ -8,7 +8,8 @@ import CustomLink from '../CustomLink';
 import { commonModalClasses } from '../../utils/theme';
 import FormContainer from '../form/FormContainer';
 import { createUser } from '../../api/auth';
-import { useNotification } from '../../hooks';
+import { useAuth, useNotification } from '../../hooks';
+import { useEffect } from 'react';
 
 const validateUserInfo = ({name, email, password}) => {
 
@@ -39,6 +40,8 @@ export default function Signup() {
   });
 
   const navigate = useNavigate();
+  const { authInfo } = useAuth();
+  const { isLoggedIn } = authInfo;
 
   const {updateNotification} = useNotification();
 
@@ -63,6 +66,11 @@ export default function Signup() {
       replace: true ///replace****:does not store the history 用户点击浏览器“返回”按钮时不会返回到你导航之前的页面。
     });
   };
+
+  useEffect(() => {
+     // move the user to somewhere
+     if (isLoggedIn) navigate('/');
+  }, [isLoggedIn]);
 
   return (
     <FormContainer>
