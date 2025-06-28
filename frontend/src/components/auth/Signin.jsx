@@ -4,6 +4,7 @@ import Title from '../form/Title';
 import FormInput from '../form/FormInput';
 import Submit from '../form/Submit';
 import CustomLink from '../CustomLink';
+import { isValidEmail } from '../../utils/helper'
 import { commonModalClasses } from '../../utils/theme';
 import FormContainer from '../form/FormContainer';
 import { useAuth, useNotification } from '../../hooks';
@@ -16,10 +17,9 @@ const validateUserInfo = ({ email, password}) => {
 
   // eslint-disable-next-line
   // eslint-disable-next-line
-  const isValidEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
   if (!email.trim()) return {ok: false, error:'Email is missing'};
-  if (!isValidEmail.test(email)) return {ok: false, error:'Invalid Email'};
+  if (!isValidEmail(email)) return {ok: false, error:'Invalid Email'};
 
   if (!password.trim()) return {ok: false, error:'Password missing'};
   if (password.length < 6) return {ok: false, error:'Password must be at least 6 characters.'};

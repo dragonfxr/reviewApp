@@ -1,6 +1,7 @@
 import React, { createContext, useState } from 'react';
 import { getIsAuth, signInUser } from '../../api/auth';
 import { useEffect } from 'react';
+import { useNotification } from '../../hooks';
 
 export const AuthContext = createContext();
 
@@ -14,7 +15,7 @@ const defaultAuthInfo = {
 export default function AuthProvider({children}) { //default 让它可以默认导出，否则导入的时候需要用花括号导入
   //组件或模块主角 → 用 default export；
   //多个函数/工具/配置 → 用 named export。
-  // const { updateNotification } = useNotification();
+  const { updateNotification } = useNotification();
 
   const [authInfo, setAuthInfo] = useState({
       ...defaultAuthInfo
@@ -24,6 +25,7 @@ export default function AuthProvider({children}) { //default 让它可以默认�
     setAuthInfo({ ...authInfo, isPending: true });
     const { error, user } = await signInUser({ email, password });
     if (error) {
+      updateNotification('error', error);
       return setAuthInfo({ ...authInfo, isPending: false, error });
     }
 
@@ -44,6 +46,7 @@ export default function AuthProvider({children}) { //default 让它可以默认�
     setAuthInfo({ ...authInfo, isPending: true });
     const { error, user } = await getIsAuth(token);
     if (error) {
+      updateNotification('error', error);
       return setAuthInfo({ ...authInfo, isPending: false, error });
     }
 
