@@ -5,7 +5,7 @@ import Submit from '../form/Submit';
 import Title from '../form/Title';
 import FormContainer from '../form/FormContainer';
 import { commonModalClasses } from '../../utils/theme';
-import { verifyUserEmail } from '../../api/auth';
+import { resendEmailVerificationToken, verifyUserEmail } from '../../api/auth';
 import { useAuth, useNotification } from '../../hooks';
 
 const OTP_LENGTH = 6;
@@ -27,12 +27,14 @@ export default function EmailVerification() {
   const [activeOtpIndex, setActiveOtpIndex] = useState(0);
   
   const {isAuth, authInfo } = useAuth();
-  const { isLoggedIn} = authInfo;
+  const { isLoggedIn, profile } = authInfo;
+  const isVerified = profile?.isVerified;
 
   const inputRef = useRef();
   const {updateNotification} = useNotification();
 
-  const { state } = useLocation();
+  const { state } = useLocation();//只在跳转时传递一次，刷新页面就没了（不是 URL 参数，也不会持久）
+  //navigate的时候附带了一些状态数据
   const user = state?.user;
 
   const navigate = useNavigate();
@@ -68,11 +70,18 @@ export default function EmailVerification() {
      }
   };
 
+  const handleOTPResend = async () => {
+    const {error, message} = await resendEmailVerificationToken(user.id);
+
+    if (error) return updateNotification('error', error);
+    updateNotification('success', message);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if(!isValidOTP(otp)){
-      return updateNotification(error, 'invalid OTP');
+      return updateNotification('error', 'invalid OTP');
     };
 
     //解构出user并且重命名。如果 error 不存在不会报错，它只是会把 error 赋值为 undefined
@@ -90,8 +99,8 @@ export default function EmailVerification() {
 
   useEffect(() => {
     if (!user) navigate('/not-found');
-    if (isLoggedIn) navigate('/');
-  }, [user, isLoggedIn]);
+    if (isLoggedIn && isVerified) navigate('/');
+  }, [user, isLoggedIn, isVerified]);
 
   // if (!user) return null;
 
@@ -120,8 +129,18 @@ export default function EmailVerification() {
                 );
               })}
             </div>
-              <Submit value='Verify Account'/>
-            </form>
+            <div>
+              <Submit value='Verify Account'/>{/*Submit按钮已经指定了type是submit */}
+              {/* 在一个 <form> 表单中，如果按钮是 <button>，但没有指定 type 属性，它默认的行为是 type="submit"，会提交表单 */}
+              <button 
+                onClick={handleOTPResend}
+                type='button' 
+                className='dark:text-white text-blue-500 font-semibold hover:underline mt=2'
+              >
+                I do not have an OTP
+              </button>
+            </div>
+          </form>
         </Container>
     </FormContainer>
   )

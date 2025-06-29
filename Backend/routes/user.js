@@ -18,7 +18,7 @@ router.post("/reset-password", validatePassword, validate, isValidPassResetToken
 
 router.get("/is-auth", isAuth, (req, res) => {// isAuth middle ware 把认证后的用户信息 user 添加到请求对象（req）上，然后交给下一个中间件或路由处理函数继续处理
   const { user } = req;
-  res.json({ user: { id: user._id, name: user.name, email: user.email } });
+  res.json({ user: { id: user._id, name: user.name, email: user.email, isVerified: user.isVerified } });
 });
 
 module.exports = router;

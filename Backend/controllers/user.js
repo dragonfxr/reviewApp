@@ -47,7 +47,7 @@ exports.create = async (req, res) => {
         id: newUser._id,
         name:newUser.name,
         email: newUser.email,
-      }
+      },
     });
 };
 
@@ -93,7 +93,16 @@ exports.verifyEmail = async (req, res) => {
   //Usage: jwt.sign(payload, secretOrPrivateKey, [options, callback])
   const jwtToken = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {expiresIn: '10d'});
 
-  res.json({user: { id:user._id, name:user.name, email:user.email, token:jwtToken }, message: 'Your email is verified!', });
+  res.json({
+    user: { 
+      id: user._id, 
+      name: user.name, 
+      email: user.email, 
+      token: jwtToken, 
+      isVerified: user.isVerified 
+    }, 
+    message: 'Your email is verified!', 
+  });
 };
 
 exports.resendEmailVerificationToken = async (req, res) => {
@@ -105,7 +114,7 @@ exports.resendEmailVerificationToken = async (req, res) => {
   if (user.isVerified) return sendError(res, "This email id is already verified!");
 
   const token = await EmailVerificationToken.findOne({ owner:userId });
-  if (token) return endError(res, "Only after one hour, you can request for another OTP");
+  if (token) return sendError(res, "Only after one hour, you can request for another OTP");
 
   // generate 6 digits otp
   let OTP = generateOTP(6);
@@ -208,11 +217,11 @@ exports.signIn = async (req, res, next) => {
   const match = await user.comparePassword(password);
   if (!match) return sendError(res, 'Email/Password is incorrect!');
 
-  const {_id, name } = user;//_id 是 Mongoose 自动添加的主键字段，不需要手动写，永远都会存在！
+  const {_id, name, isVerified } = user;//_id 是 Mongoose 自动添加的主键字段，不需要手动写，永远都会存在！
   //user 对象里还有 email、isVerified、password 等属性，但不需要email等，只需要name所以就只解构出来name就可以了
 
   //Usage: jwt.sign(payload, secretOrPrivateKey, [options, callback])
   const jwtToken = jwt.sign({userId: _id}, process.env.JWT_SECRET, {expiresIn: '10d'});
   
-  res.json({user : {id:_id, name, email, token: jwtToken}});
+  res.json({user : {id:_id, name, email, token: jwtToken, isVerified }});
 };
