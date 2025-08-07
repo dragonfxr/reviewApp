@@ -19,6 +19,12 @@ exports.signInValidator = [// no need to next(), because already handled the err
 exports.validatePassword = [check('newPassword').trim().not().isEmpty().withMessage('Password is missing.').isLength({ min:6, max:20}).withMessage(
     'Password must be 6-20 characters long.'),];
 
+exports.actorInfoValidator = [
+    check('name').trim().not().isEmpty().withMessage('The actor name is missing.'),
+    check('about').trim().not().isEmpty().withMessage('About is required.'),
+    check('gender').trim().not().isEmpty().withMessage('Gender is required.'),
+];
+
 exports.validate = (req, res, next) => {
     const error = validationResult(req).array();
     if (error.length) {
