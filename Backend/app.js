@@ -3,8 +3,8 @@ require('express-async-errors');
 const morgan = require("morgan");
 const cors = require('cors');
 const { errorHandler } = require("./middleware/error");
+require('dotenv').config();//这个必须在helper.js（下面）之前加载，否则helper里用用到环境变量，就加载不到了
 const { handleNotFound } = require("./utils/helper");
-require('dotenv').config();
 require("./db/index");//mongoose uri
 const userRouter = require("./routes/user");//.js
 const actorRouter = require("./routes/actor");//.js

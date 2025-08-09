@@ -1,14 +1,8 @@
 const Actor = require('../models/actor');
-const {sendError} = require('../utils/helper');
+const {sendError, uploadImageToCloud, formatActor} = require('../utils/helper');
 const { isValidObjectId } = require('mongoose');
+const cloudinary = require('../cloud/index');
 
-const cloudinary = require('cloudinary').v2;
-cloudinary.config({ 
-  cloud_name: process.env.CLOUD_NAME, 
-  api_key: process.env.CLOUD_KEY, 
-  api_secret: process.env.CLOUD_SECRET,
-  secure: true
-});
 
 exports.create = async (req, res) => {
     const {name, about, gender} = req.body;
@@ -17,21 +11,13 @@ exports.create = async (req, res) => {
     const newActor = new Actor({name, about, gender});
 
     if(file){
-        const {secure_url, public_id} = await cloudinary.uploader.upload(image.path, {
-            resource_type: 'image'
-        });
-        newActor.avatar = {url: secure_url, public_id};
-    }
+        const {url, public_id} = await uploadImageToCloud(file.path);
+        newActor.avatar = {url, public_id};
+    };
     
     await newActor.save();
 
-    res.status(201).json({
-        id: newActor._id, 
-        name, 
-        about, 
-        gender, 
-        avatar: newActor.avatar?.url
-    });
+    res.status(201).json(formatActor(newActor));
 };
 
 
@@ -45,6 +31,7 @@ exports.update = async (req, res) => {
     if (!actor) return sendError(res, 'Invalid request, record not found!');
 
     const public_id = actor.avatar?.public_id;
+
     //remove old image if there was one!
     if(public_id && file){
         const {result} = await cloudinary.uploader.destroy(public_id);
@@ -55,10 +42,8 @@ exports.update = async (req, res) => {
     
     // upload new avatar if there is one!
     if(file){
-        const {secure_url, public_id} = await cloudinary.uploader.upload(image.path, {
-            resource_type: 'image'
-        });
-        actor.avatar = {url: secure_url, public_id};
+        const {url, public_id} = await uploadImageToCloud(file.path);
+        actor.avatar = {url, public_id};
     };
     actor.name = name;
     actor.about = about;
@@ -66,11 +51,55 @@ exports.update = async (req, res) => {
 
     await actor.save();
 
-    res.status(201).json({
-        id: actor._id, 
-        name, 
-        about, 
-        gender, 
-        avatar: actor.avatar?.url
-    });
+    res.status(201).json(formatActor(actor));
+};
+
+exports.remove = async (req, res) => {
+    const { actorId } = req.params;
+
+    if (!isValidObjectId(actorId)) return sendError(res, 'Invalid request!');
+    const actor = await Actor.findById(actorId);
+
+    if (!actor) return sendError(res, 'Invalid request, record not found!');
+
+    //check if avatar is inside
+    const public_id = actor.avatar?.public_id;
+
+    //remove old image if there was one!
+    if(public_id){
+        const {result} = await cloudinary.uploader.destroy(public_id);
+        if(result !== 'ok'){
+            return sendError(res, 'Could not remove image from cloud!');
+        };
+    };
+    
+    await Actor.findByIdAndDelete(actorId);
+
+    res.json({message: 'Record removed successfully!'});
+};
+
+exports.search = async (req, res) => {
+    const {query} = req;
+    const result = await Actor.find( {$text: {$search:`"${query.name}"`}});
+
+    const actors = result.map(actor => formatActor(actor))
+    res.json(result);
+};
+
+exports.getLatestActors = async (req, res) => {
+    const result = await Actor.find().sort({createdAt: -1}).limit(10);//'-1': sort in descending order. 'limit': how many you want to fetch
+
+    const actors = result.map(actor => formatActor(actor))
+    res.json(result);
+};
+
+exports.getSingleActor = async (req, res) => {
+    const {id} = req.params;
+    
+    if (!isValidObjectId(id)) return sendError(res, 'Invalid request!');
+    
+    const actor = await Actor.findById(id);
+    if (!actor) return sendError(res, 'Invalid request, actor not found!', 404);
+ 
+    res.json(formatActor(actor));
 };
