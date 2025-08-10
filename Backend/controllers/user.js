@@ -217,11 +217,11 @@ exports.signIn = async (req, res, next) => {
   const match = await user.comparePassword(password);
   if (!match) return sendError(res, 'Email/Password is incorrect!');
 
-  const {_id, name, isVerified } = user;//_id 是 Mongoose 自动添加的主键字段，不需要手动写，永远都会存在！
+  const {_id, name, role, isVerified } = user;//_id 是 Mongoose 自动添加的主键字段，不需要手动写，永远都会存在！
   //user 对象里还有 email、isVerified、password 等属性，但不需要email等，只需要name所以就只解构出来name就可以了
 
   //Usage: jwt.sign(payload, secretOrPrivateKey, [options, callback])
   const jwtToken = jwt.sign({userId: _id}, process.env.JWT_SECRET, {expiresIn: '10d'});
   
-  res.json({user : {id:_id, name, email, token: jwtToken, isVerified }});
+  res.json({user : {id:_id, name, email, role, token: jwtToken, isVerified }});
 };

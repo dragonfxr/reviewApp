@@ -26,12 +26,12 @@ export default function EmailVerification() {
   const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(''));
   const [activeOtpIndex, setActiveOtpIndex] = useState(0);
   
-  const {isAuth, authInfo } = useAuth();
+  const { isAuth, authInfo } = useAuth();
   const { isLoggedIn, profile } = authInfo;
   const isVerified = profile?.isVerified;
 
   const inputRef = useRef();
-  const {updateNotification} = useNotification();
+  const { updateNotification } = useNotification();
 
   const { state } = useLocation();//只在跳转时传递一次，刷新页面就没了（不是 URL 参数，也不会持久）
   //navigate的时候附带了一些状态数据

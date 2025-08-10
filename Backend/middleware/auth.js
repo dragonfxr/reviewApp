@@ -2,8 +2,10 @@ const { sendError } = require("../utils/helper");
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+//middleware
 exports.isAuth = async (req, res, next) => {
     const token = req.headers?.authorization;
+    if (!token) return sendError(res, 'Invalid token!');
 
     const jwtToken = token.split('Bearer ')[1];
 
@@ -18,3 +20,10 @@ exports.isAuth = async (req, res, next) => {
     req.user = user;//把认证后的用户信息 user 添加到请求对象上，然后交给下一个中间件或路由处理函数继续处理（给请求加一个字段叫user）
     next();
 };
+
+exports.isAdmin = (req, res, next) => {
+    const {user} = req;
+
+    if(user.role != 'admin') return sendError(res, "unauthorized access!");
+    next();
+}
