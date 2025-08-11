@@ -26,10 +26,10 @@ router.post(
     update
 );
 
-router.delete('/:actorId', isAuth, isAdmin, remove);
+router.delete('/:actorId',isAuth, isAdmin, remove);
 
-router.get('/search', isAuth, isAdmin, search);
-router.get('/latest-uploads', isAuth, isAdmin, getLatestActors);
+router.get('/search',isAuth, isAdmin, search);
+router.get('/latest-uploads',isAuth, isAdmin, getLatestActors);
 router.get('/single/:id', getSingleActor);
 
 module.exports = router;

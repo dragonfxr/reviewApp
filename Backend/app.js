@@ -8,6 +8,7 @@ const { handleNotFound } = require("./utils/helper");
 require("./db/index");//mongoose uri
 const userRouter = require("./routes/user");//.js
 const actorRouter = require("./routes/actor");//.js
+const movieRouter = require("./routes/movie");//.js
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use('/api/user', userRouter);
 app.use('/api/actor', actorRouter);
+app.use('/api/movie', movieRouter);
 
 app.use('/*', handleNotFound);
 
