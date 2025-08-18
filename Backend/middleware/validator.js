@@ -1,4 +1,6 @@
 const { check, validationResult } = require("express-validator");
+const genres = require('../utils/genres');
+const { isValidObjectId } = require("mongoose");
 
 exports.userValidator = [// no need to next(), because already handled the error.
     check('name').trim().not().isEmpty().withMessage('Name is missing.'),
@@ -33,7 +35,7 @@ exports.validateMovie = [
     .isEmpty()
     .withMessage("Storyline is important!"),
   check("language").trim().not().isEmpty().withMessage("Language is missing!"),
-  check("releseDate").isDate().withMessage("Relese date is missing!"),
+  check("releaseDate").isDate().withMessage("Release date is missing!"),
   check("status")
     .isIn(["public", "private"])
     .withMessage("Movie status must be public or private!"),
@@ -63,19 +65,20 @@ exports.validateMovie = [
     .withMessage("Cast must be an array of objects!")
     .custom((cast) => {
       for (let c of cast) {
-        if (!isValidObjectId(c.id)) throw Error("Invalid cast id inside cast!");
+        if (!isValidObjectId(c.actor)) throw Error("Invalid cast id inside cast!");
         if (!c.roleAs?.trim()) throw Error("Role as is missing inside cast!");
         if (typeof c.leadActor !== "boolean")
           throw Error(
             "Only accepted boolean value inside leadActor inside cast!"
           );
-        return true;
-      }
+        }
+      return true;
     }),
   check("trailer")
     .isObject()
     .withMessage("trailer must be an object with url and public_id")
-    .custom(({ url, public_id }) => {// trailer这个对象里面有url， public_id两个字段，拿出来处理
+    .custom((trailer) => {// trailer这个对象里面有url， public_id两个字段，拿出来处理
+      const { url, public_id } = trailer;
       try {
         const result = new URL(url);
         if (!result.protocol.includes("http"))

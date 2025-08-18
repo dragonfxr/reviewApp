@@ -1,5 +1,7 @@
 const { sendError } = require("../utils/helper");
-const cloudinary = require("../cloud")
+const cloudinary = require("../cloud");
+const Movie = require('../models/movie');
+const { isValidObjectId } = require('mongoose');
 
 exports.uploadTrailer = async (req, res) => {
     const {file} = req;
@@ -23,11 +25,66 @@ exports.createMovie = async (req, res) => {
         tags,
         cast,
         writers,
-        poster,
         trailer,
         language,
     } = body;
 
-    console.log(body);
-    res.send('ok')
+    const newMovie = new Movie({
+        title,
+        storyLine, 
+        releaseDate,
+        status,
+        type,
+        genres,
+        tags,
+        cast,
+        trailer,
+        language,
+    });
+
+    if(director) {
+        if(!isValidObjectId(director)) return sendError(res, 'Invalid director id!');
+        newMovie.director = director;
+    };
+    if (writers) {
+        for (let w of writers){
+            if(!isValidObjectId(w)) return sendError(res, 'Invalid writer id!');
+        }
+        newMovie.writers = writers;
+    };
+
+    //uploading poster:
+    const {secure_url:url, public_id, responsive_breakpoints} = await cloudinary.uploader.upload(
+        file.path, {
+            responsive_breakpoints: {
+                create_derived: true,
+                max_width: 640,
+                max_images: 3,
+            },
+            transformation: {
+                width: 1280, 
+                height: 720
+            },
+        }
+    );
+
+    const finalPoster = {url, public_id, responsive: []};
+
+    const {breakpoints} = responsive_breakpoints[0];
+
+    if(breakpoints.length){
+        for (let imageObject of breakpoints){
+            const {secure_url} = imageObject;
+            finalPoster.responsive.push(secure_url);
+        };
+    };
+    newMovie.poster = finalPoster;
+
+    await newMovie.save();
+
+    res.status(201).json({
+        id:newMovie._id,
+        title,
+    })
+    
 };
